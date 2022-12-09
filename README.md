@@ -1,4 +1,4 @@
-# Run-on-Slack Deno: Translator App (powered by DeepL API)
+# Run-on-Slack: Translator App (powered by DeepL API)
 
 This app contains a sample TypeScript project for use on Slack's
 [next-generation hosted platform](https://api.slack.com/future). The project
@@ -16,7 +16,8 @@ the full list of the supported languages, head to
   - [Create Your DeepL API Account](#create-your-deepl-api-account)
   - [Install the Slack CLI](#install-the-slack-cli)
   - [Clone the Template](#clone-the-template)
-- [Create a Link Trigger](#create-a-link-trigger-for-configuring-your-app)
+  - [Save Env Values](#save-env-values)
+- [Create a link trigger](#create-a-link-trigger-for-configuring-your-app)
 - [Running Your Project Locally](#running-your-project-locally)
 - [Testing](#testing)
 - [Deploying Your App](#deploying-your-app)
@@ -40,19 +41,13 @@ calls. Head to
 [the DeepL API's document site](https://www.deepl.com/en/docs-api) and create
 [your own API account](https://www.deepl.com/account/summary).
 
-Copy [the token string](https://www.deepl.com/account/summary) and save the
-value in `.env` file:
+Please note that **API accounts are different from DeepL's regular accounts**.
+Even when you already have an account for using the text translation on the
+website, a new account for API usage needs to be created.
 
-```
-DEEPL_AUTH_KEY=(your token here)
-```
-
-When you deploy your app, you can set the same value by running the following
-command:
-
-```bash
-slack env add DEEPL_AUTH_KEY (you token here)
-```
+Once you create your API account, copy the API token string on
+[the account summary page](https://www.deepl.com/account/summary). We will use
+it later.
 
 ### Install the Slack CLI
 
@@ -72,25 +67,41 @@ $ slack create my-deepl-translator -t slack-samples/deno-deepl-translator
 $ cd my-deepl-translator
 ```
 
+## Save Env Values
+
+Copy [the DeepL token string](https://www.deepl.com/account/summary) and save
+the value in `.env` file:
+
+```
+DEEPL_AUTH_KEY=(your token here)
+```
+
+When you deploy your app later, you can set the same value by running the
+following command:
+
+```bash
+slack env add DEEPL_AUTH_KEY (you token here)
+```
+
 ## Create a link trigger for configuring your app
 
-[Triggers](https://api.slack.com/future/triggers) are what cause Workflows to
-run. These Triggers can be invoked by a user, or automatically as a response to
+[Triggers](https://api.slack.com/future/triggers) are what cause workflows to
+run. These triggers can be invoked by a user, or automatically as a response to
 an event within Slack.
 
-A [Link Trigger](https://api.slack.com/future/triggers/link) is a type of
+A [link trigger](https://api.slack.com/future/triggers/link) is a type of
 Trigger that generates a **Shortcut URL** which, when posted in a channel or
-added as a bookmark, becomes a link. When clicked, the Link Trigger will run the
-associated Workflow.
+added as a bookmark, becomes a link. When clicked, the link trigger will run the
+associated workflow.
 
-Link Triggers are _unique to each installed version of your app_. This means
+Link triggers are _unique to each installed version of your app_. This means
 that Shortcut URLs will be different across each workspace, as well as between
 [locally run](#running-your-project-locally) and
-[deployed apps](#deploying-your-app). When creating a Trigger, you must select
-the Workspace that you'd like to create the Trigger in. Each Workspace has a
+[deployed apps](#deploying-your-app). When creating a trigger, you must select
+the Workspace that you'd like to create the trigger in. Each Workspace has a
 development version (denoted by `(dev)`), as well as a deployed version.
 
-To create a Link Trigger for the Workflow in this template, run the following
+To create a link trigger for the workflow in this template, run the following
 command:
 
 ```zsh
@@ -101,7 +112,7 @@ After selecting a Workspace, the output provided will include the link trigger
 Shortcut URL. Copy and paste this URL into a channel as a message, or add it as
 a bookmark in a channel of the Workspace you selected.
 
-**Note: this link won't run the Workflow until the app is either running locally
+**Note: this link won't run the workflow until the app is either running locally
 or deployed!** Read on to learn how to run your app locally and eventually
 deploy it to Slack hosting.
 
@@ -120,7 +131,7 @@ Connected, awaiting events
 
 Once running, click the
 [previously created Shortcut URL](#create-a-link-trigger) associated with the
-`(dev)` version of your app. This should start the included sample Workflow.
+`(dev)` version of your app. This should start the included sample workflow.
 
 To stop running locally, press `<CTRL> + C` to end the process.
 
@@ -199,12 +210,12 @@ script hooks that are executed by the CLI and implemented by the SDK.
 
 [Functions](https://api.slack.com/future/functions) are reusable building blocks
 of automation that accept inputs, perform calculations, and provide outputs.
-Functions can be used independently or as steps in Workflows.
+Functions can be used independently or as steps in workflows.
 
 ### `/workflows`
 
 A [Workflow](https://api.slack.com/future/workflows) is a set of steps that are
-executed in order. Each step in a Workflow is a function.
+executed in order. Each step in a workflow is a function.
 
 Workflows can be configured to run without user input or they can collect input
 by beginning with a [form](https://api.slack.com/future/forms) before continuing
@@ -212,7 +223,7 @@ to the next step.
 
 ### `/triggers`
 
-[Triggers](https://api.slack.com/future/triggers) determine when Workflows are
+[Triggers](https://api.slack.com/future/triggers) determine when workflows are
 executed. A trigger file describes a scenario in which a workflow should be run,
 such as a user pressing a button or when a specific event occurs.
 
