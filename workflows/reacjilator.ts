@@ -20,7 +20,7 @@ const workflow = DefineWorkflow({
   },
 });
 
-// Detect the languag to traslate into
+// Detect the language to translate into
 const langDetection = workflow.addStep(detectLang, workflow.inputs);
 
 // Call DeepL's text translation API and then post the result in the same thread

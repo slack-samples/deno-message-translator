@@ -16,7 +16,7 @@ the full list of the supported languages, head to
   - [Create Your DeepL API Account](#create-your-deepl-api-account)
   - [Install the Slack CLI](#install-the-slack-cli)
   - [Clone the Template](#clone-the-template)
-- [Create a Link Trigger](#create-a-link-trigger)
+- [Create a Link Trigger](#create-a-link-trigger-for-configuring-your-app)
 - [Running Your Project Locally](#running-your-project-locally)
 - [Testing](#testing)
 - [Deploying Your App](#deploying-your-app)
@@ -72,7 +72,7 @@ $ slack create my-deepl-translator -t slack-samples/deno-deepl-translator
 $ cd my-deepl-translator
 ```
 
-## Create a Link Trigger for configuring your app
+## Create a link trigger for configuring your app
 
 [Triggers](https://api.slack.com/future/triggers) are what cause Workflows to
 run. These Triggers can be invoked by a user, or automatically as a response to
@@ -97,7 +97,7 @@ command:
 $ slack trigger create --trigger-def triggers/configurator.ts
 ```
 
-After selecting a Workspace, the output provided will include the Link Trigger
+After selecting a Workspace, the output provided will include the link trigger
 Shortcut URL. Copy and paste this URL into a channel as a message, or add it as
 a bookmark in a channel of the Workspace you selected.
 
@@ -157,9 +157,9 @@ $ slack deploy
 $ slack env add DEEPL_AUTH_KEY (your key here)
 ```
 
-After deploying, [create a new Link Trigger](#create-a-link-trigger) for the
-production version of your app (not appended with `(dev)`). Once the Trigger is
-invoked, the Workflow should run just as it did in when developing locally.
+After deploying, [create a new link trigger](#create-a-link-trigger) for the
+production version of your app (not appended with `(dev)`). Once the trigger is
+invoked, the workflow should run just as it did in when developing locally.
 
 Also, for production-grade operations, we highly recommend enabling the
 `maintenance_job.ts` workflow. This workflow requires the app's bot user to be a
