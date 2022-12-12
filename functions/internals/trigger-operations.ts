@@ -5,8 +5,9 @@ export async function findTriggerToUpdate(
   workflowCallbackId: string,
 ) {
   // Check the existing triggers for this workflow
-  const allTriggers = await client.workflows.triggers.list({});
+  const allTriggers = await client.workflows.triggers.list({ is_owner: true });
   let triggerToUpdate = undefined;
+
   // find the trigger to update
   if (allTriggers.triggers) {
     for (const trigger of allTriggers.triggers) {
@@ -49,6 +50,9 @@ export async function createOrUpdateTrigger(
       },
       inputs: triggerInputs,
     });
+    if (creation.error) {
+      throw new Error(JSON.stringify(creation));
+    }
     console.log(`A new trigger created: ${JSON.stringify(creation)}`);
   } else {
     // Update the existing trigger
@@ -63,6 +67,9 @@ export async function createOrUpdateTrigger(
       },
       inputs: triggerInputs,
     });
+    if (update.error) {
+      throw new Error(JSON.stringify(update));
+    }
     console.log(`A new trigger updated: ${JSON.stringify(update)}`);
   }
 }
