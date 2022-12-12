@@ -101,8 +101,8 @@ that Shortcut URLs will be different across each workspace, as well as between
 the Workspace that you'd like to create the trigger in. Each Workspace has a
 development version (denoted by `(dev)`), as well as a deployed version.
 
-To create a link trigger for the workflow in this template, run the following
-command:
+To create a link trigger for the workflow that enables end-users to configure
+the translator workflow in this template, run the following command:
 
 ```zsh
 $ slack trigger create --trigger-def triggers/configurator.ts
