@@ -1,23 +1,24 @@
-# Run-on-Slack: Translator App (powered by DeepL API)
+# Deno Message Translator App (powered by DeepL API)
 
 This app contains a sample TypeScript project for use on Slack's
 [next-generation hosted platform](https://api.slack.com/future). The project
-demonstrates how to run a simple message translator workflow in response to
-national flag based reactions. Admins can configure where to run this app using
-a link trigger based interactions to maintain the list of channels. Once the app
-is added to a channel, end-users can translate any messages into a different
-language just by adding a reaction such as 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵, and more! To learn
-the full list of the supported languages, head to
+demonstrates a simple message translator app. The app is added to designated
+channels by running a configurator workflow. Once added to specific channel(s),
+the app will translate any message there when a user adds a reaction to the
+message (ex: 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵, and more)!
+
+To learn the full list of the supported languages, head to
 [the DeepL API's document site](https://www.deepl.com/en/docs-api).
 
 **Guide Outline**:
 
+- [Supported Workflows](#supported-workflows)
 - [Setup](#setup)
   - [Create Your DeepL API Account](#create-your-deepl-api-account)
   - [Install the Slack CLI](#install-the-slack-cli)
   - [Clone the Template](#clone-the-template)
   - [Save Env Values](#save-env-values)
-- [Create a link trigger](#create-a-link-trigger-for-configuring-your-app)
+- [Create a Link Trigger](#create-a-link-trigger-for-configuring-your-app)
 - [Running Your Project Locally](#running-your-project-locally)
 - [Testing](#testing)
 - [Deploying Your App](#deploying-your-app)
@@ -26,6 +27,16 @@ the full list of the supported languages, head to
 - [Resources](#resources)
 
 ---
+
+## Supported Workflows
+
+- **Configurator:** Configure what channels the app can translate messages in.
+- **Reacjilator:** Runs when a user reacts to a message in a channel where the
+  app is added. If the reaction is a supported flag emoji (ex: 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵),
+  then the app will respond in the message thread with a translated message in a
+  language corresponding to the flag a user reacted with.
+- **Maintenance Job:** Runs daily to add the app back to channels where users
+  have manually removed the app. Recommended for production-grade operations.
 
 ## Setup
 
@@ -90,7 +101,7 @@ run. These triggers can be invoked by a user, or automatically as a response to
 an event within Slack.
 
 A [link trigger](https://api.slack.com/future/triggers/link) is a type of
-Trigger that generates a **Shortcut URL** which, when posted in a channel or
+trigger that generates a **Shortcut URL** which, when posted in a channel or
 added as a bookmark, becomes a link. When clicked, the link trigger will run the
 associated workflow.
 
@@ -178,7 +189,7 @@ to be a member of the channels. When you add a new channel in the configuration
 modal, the bot user automatically joins the channel. However, anyone can remove
 the bot user from the channels at any time. To get the bot user back again,
 running the daily maintenance job should be a good-enough solution. You can
-enable it by running the folllowing command, which generates a scheduled trigger
+enable it by running the following command, which generates a scheduled trigger
 to run it daily:
 
 ```bash
@@ -214,7 +225,7 @@ Functions can be used independently or as steps in workflows.
 
 ### `/workflows`
 
-A [Workflow](https://api.slack.com/future/workflows) is a set of steps that are
+A [workflow](https://api.slack.com/future/workflows) is a set of steps that are
 executed in order. Each step in a workflow is a function.
 
 Workflows can be configured to run without user input or they can collect input
