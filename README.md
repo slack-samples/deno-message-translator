@@ -2,10 +2,12 @@
 
 This app contains a sample TypeScript project for use on Slack's
 [next-generation hosted platform](https://api.slack.com/future). The project
-demonstrates a simple message translator app. The app is added to designated channels by running a configurator workflow. Once added to specific channel(s), the app will translate any message there when a user adds a reaction to the message (ex: 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵, and more)!
+demonstrates a simple message translator app. The app is added to designated
+channels by running a configurator workflow. Once added to specific channel(s),
+the app will translate any message there when a user adds a reaction to the
+message (ex: 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵, and more)!
 
-To learn
-the full list of the supported languages, head to
+To learn the full list of the supported languages, head to
 [the DeepL API's document site](https://www.deepl.com/en/docs-api).
 
 **Guide Outline**:
@@ -29,8 +31,12 @@ the full list of the supported languages, head to
 ## Supported Workflows
 
 - **Configurator:** Configure what channels the app can translate messages in.
-- **Reacjilator:** Runs when a user reacts to a message in a channel where the app is added. If the reaction is a supported flag emoji (ex: 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵), then the app will respond in the message thread with a translated message in a language corresponding to the flag a user reacted with.
-- **Maintenance Job:** Runs daily to add the app back to channels where users have manually removed the app. Recommended for production-grade operations.
+- **Reacjilator:** Runs when a user reacts to a message in a channel where the
+  app is added. If the reaction is a supported flag emoji (ex: 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵),
+  then the app will respond in the message thread with a translated message in a
+  language corresponding to the flag a user reacted with.
+- **Maintenance Job:** Runs daily to add the app back to channels where users
+  have manually removed the app. Recommended for production-grade operations.
 
 ## Setup
 
