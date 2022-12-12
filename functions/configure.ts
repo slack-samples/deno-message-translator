@@ -42,10 +42,14 @@ export default SlackFunction(def, async ({
     : [];
 
   // Open the modal to configure the channel list to enable this workflow
-  await client.views.open({
+  const response = await client.views.open({
     interactivity_pointer: inputs.interactivityPointer,
     view: buildModalView(channelIds),
   });
+  if (!response.ok) {
+    console.log(JSON.stringify(response, null, 2));
+    throw new Error(`Failed to open a modal (error: ${response.error})`);
+  }
   return {
     // Set this to continue the interaction with this user
     completed: false,

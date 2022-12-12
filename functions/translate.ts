@@ -72,6 +72,15 @@ export default SlackFunction(def, async ({
     },
     body,
   });
+  if (deeplResponse.status != 200) {
+    // If the status code is 403, the given auth key is not valid
+    const body = await deeplResponse.text();
+    const error = `Translation failed for some reason: ${
+      JSON.stringify(`status: ${deeplResponse.status}, body: ${body}`)
+    }`;
+    console.log(error);
+    throw new Error(error);
+  }
   const translationResult = await deeplResponse.json();
   if (
     !translationResult ||

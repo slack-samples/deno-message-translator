@@ -71,15 +71,25 @@ export async function joinAllChannels(
   client: SlackAPIClient,
   channelIds: string[],
 ) {
-  for (const channelId of channelIds) {
-    const response = await client.conversations.join({
-      channel: channelId,
-    });
-    console.log(`conversations.join API result: ${JSON.stringify(response)}`);
-    if (response.error) {
-      const error = `Failed to join <#${channelId}> due to ${response.error}`;
-      console.log(error);
-      return error;
-    }
+  const futures = channelIds.map((c) => joinChannel(client, c));
+  const results = (await Promise.all(futures)).filter((r) => r !== undefined);
+  if (results.length > 0) {
+    return results[0];
+  }
+  return undefined;
+}
+
+async function joinChannel(
+  client: SlackAPIClient,
+  channelId: string,
+) {
+  const response = await client.conversations.join({
+    channel: channelId,
+  });
+  console.log(`conversations.join API result: ${JSON.stringify(response)}`);
+  if (response.error) {
+    const error = `Failed to join <#${channelId}> due to ${response.error}`;
+    console.log(error);
+    return error;
   }
 }
