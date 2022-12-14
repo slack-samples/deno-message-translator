@@ -30,39 +30,52 @@ export default SlackFunction(def, async ({
   if (inputs.lang === undefined) {
     // no language specified by the reaction
     console.log("Skipped as no lang detected");
-    return emptyOutputs;
+    return emptyOutputs; // this is not an error
   }
   const client: SlackAPIClient = SlackAPI(token);
-  const translationTarget = await client.conversations.history({
+  let translationTargetResponse = await client.conversations.history({
     channel: inputs.channelId,
     oldest: inputs.messageTs,
     limit: 1,
     inclusive: true,
   });
-  console.log(JSON.stringify(translationTarget, null, 2));
-  if (translationTarget.error) {
+  if (translationTargetResponse.messages.length === 0) {
+    // To fetch a reply message
+    // in a compatible way with the latest server-side behavior
+    translationTargetResponse = await client.conversations.replies({
+      channel: inputs.channelId,
+      ts: inputs.messageTs,
+      limit: 1,
+      inclusive: true,
+    });
+  }
+  console.log(`Find the target: ${JSON.stringify(translationTargetResponse)}`);
+
+  if (translationTargetResponse.error) {
     // If you see this log message, perhaps you need to invite this app to the channel
-    console.log(
-      `Failed to fetch the message due to ${translationTarget.error}. Perhaps, you need to invite this app's bot user to the channel.`,
-    );
-    return emptyOutputs;
+    const error =
+      `Failed to fetch the message due to ${translationTargetResponse.error}. Perhaps, you need to invite this app's bot user to the channel.`;
+    console.log(error);
+    return { error };
   }
 
-  if (translationTarget.messages.length == 0) {
+  if (translationTargetResponse.messages.length == 0) {
     console.log("No message found");
-    return emptyOutputs;
+    return emptyOutputs; // this is not an error
   }
+  const translationTarget = translationTargetResponse.messages[0];
+  const translationTargetThreadTs = translationTarget.thread_ts;
 
   const authKey = env.DEEPL_AUTH_KEY;
   if (!authKey) {
     const error =
       "DEEPL_AUTH_KEY needs to be set. You can place .env file for local dev. For production apps, please run `slack env add DEEPL_AUTH_KEY (your key here)` to set the value.";
-    throw { error };
+    return { error };
   }
   const apiSubdomain = authKey.endsWith(":fx") ? "api-free" : "api";
   const url = `https://${apiSubdomain}.deepl.com/v2/translate`;
   const body = new URLSearchParams();
-  const targetText = translationTarget.messages[0].text;
+  const targetText = translationTarget.text;
   body.append("auth_key", authKey);
   body.append("text", targetText);
   body.append("target_lang", inputs.lang.toUpperCase());
@@ -92,6 +105,8 @@ export default SlackFunction(def, async ({
     return { error };
   }
   const translationResult = await deeplResponse.json();
+  console.log(`translation result: ${JSON.stringify(translationResult)}`);
+
   if (
     !translationResult ||
     !translationResult.translations ||
@@ -106,7 +121,7 @@ export default SlackFunction(def, async ({
   const translatedText = translationResult.translations[0].text;
   const replies = await client.conversations.replies({
     channel: inputs.channelId,
-    ts: inputs.messageTs,
+    ts: translationTargetThreadTs ?? inputs.messageTs,
   });
   if (isAlreadyPosted(replies.messages, translatedText)) {
     // Skip posting the same one
@@ -115,13 +130,12 @@ export default SlackFunction(def, async ({
         JSON.stringify(translatedText)
       }`,
     );
-    // This is not an error
-    return emptyOutputs;
+    return emptyOutputs; // this is not an error
   }
   const result = await sayInThread(
     client,
     inputs.channelId,
-    inputs.messageTs,
+    translationTargetThreadTs ?? inputs.messageTs,
     translatedText,
   );
   return { outputs: { ts: result.ts } };
