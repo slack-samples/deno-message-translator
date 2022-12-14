@@ -48,7 +48,9 @@ export default SlackFunction(def, async ({
   });
   if (!response.ok) {
     console.log(JSON.stringify(response, null, 2));
-    throw new Error(`Failed to open a modal (error: ${response.error})`);
+    const error =
+      `Failed to open a modal in the configurator workflow. Contact the app maintainers with the following information - (error: ${response.error})`;
+    return { error };
   }
   return {
     // Set this to continue the interaction with this user

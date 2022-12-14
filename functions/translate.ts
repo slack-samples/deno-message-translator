@@ -57,13 +57,14 @@ export default SlackFunction(def, async ({
   if (!authKey) {
     const error =
       "DEEPL_AUTH_KEY needs to be set. You can place .env file for local dev. For production apps, please run `slack env add DEEPL_AUTH_KEY (your key here)` to set the value.";
-    throw new Error(error);
+    throw { error };
   }
   const apiSubdomain = authKey.endsWith(":fx") ? "api-free" : "api";
   const url = `https://${apiSubdomain}.deepl.com/v2/translate`;
   const body = new URLSearchParams();
+  const targetText = translationTarget.messages[0].text;
   body.append("auth_key", authKey);
-  body.append("text", translationTarget.messages[0].text);
+  body.append("text", targetText);
   body.append("target_lang", inputs.lang.toUpperCase());
   const deeplResponse = await fetch(url, {
     method: "POST",
@@ -73,13 +74,22 @@ export default SlackFunction(def, async ({
     body,
   });
   if (deeplResponse.status != 200) {
-    // If the status code is 403, the given auth key is not valid
+    if (deeplResponse.status == 403) {
+      // If the status code is 403, the given auth key is not valid
+      const error =
+        `Translating a mesage failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: ${deeplResponse.status}, target text: ${
+          targetText.substring(0, 30)
+        }...)`;
+      console.log(error);
+      return { error };
+    }
     const body = await deeplResponse.text();
-    const error = `Translation failed for some reason: ${
-      JSON.stringify(`status: ${deeplResponse.status}, body: ${body}`)
-    }`;
+    const error =
+      `Translating a mesage failed! Contact the app maintainers with the following information - (status: ${deeplResponse.status}, body: ${body}, target text: ${
+        targetText.substring(0, 30)
+      }...)`;
     console.log(error);
-    throw new Error(error);
+    return { error };
   }
   const translationResult = await deeplResponse.json();
   if (
@@ -87,11 +97,11 @@ export default SlackFunction(def, async ({
     !translationResult.translations ||
     translationResult.translations.length === 0
   ) {
-    const error = `Translation failed for some reason: ${
-      JSON.stringify(translationResult)
-    }`;
+    const printableResponse = JSON.stringify(translationResult);
+    const error =
+      `Translating a mesage failed! Contact the app maintainers with the following information - (DeepL API response: ${printableResponse})`;
     console.log(error);
-    throw new Error(error);
+    return { error };
   }
   const translatedText = translationResult.translations[0].text;
   const replies = await client.conversations.replies({

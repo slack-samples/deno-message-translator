@@ -1,9 +1,6 @@
-import * as mf from "https://deno.land/x/mock_fetch@0.3.0/mod.ts";
+import * as mf from "mock-fetch/mod.ts";
 import { SlackFunctionTester } from "deno-slack-sdk/mod.ts";
-import {
-  assertEquals,
-  fail,
-} from "https://deno.land/std@0.153.0/testing/asserts.ts";
+import { assertEquals } from "std/testing/asserts.ts";
 import handler from "./translate.ts";
 
 // Replaces globalThis.fetch with the mocked copy
@@ -116,13 +113,12 @@ Deno.test("Fail to translate with an invalid auth key", async () => {
   };
   const env = { DEEPL_AUTH_KEY: "invalid" };
   const token = "valid";
-  try {
-    await handler(createContext({ inputs, env, token }));
-    fail("Exception should be thrown here");
-  } catch (e) {
-    assertEquals(
-      e.message,
-      'Translation failed for some reason: "status: 403, body: "',
-    );
-  }
+  const { outputs, error } = await handler(
+    createContext({ inputs, env, token }),
+  );
+  assertEquals(outputs, undefined);
+  assertEquals(
+    error,
+    "Translating a mesage failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: 403, target text: Make work life simpler, more p...)",
+  );
 });

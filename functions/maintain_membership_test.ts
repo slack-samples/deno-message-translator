@@ -1,6 +1,6 @@
-import * as mf from "https://deno.land/x/mock_fetch@0.3.0/mod.ts";
+import * as mf from "mock-fetch/mod.ts";
 import { SlackFunctionTester } from "deno-slack-sdk/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.153.0/testing/asserts.ts";
+import { assertEquals } from "std/testing/asserts.ts";
 import handler from "./maintain_membership.ts";
 
 // Replaces globalThis.fetch with the mocked copy

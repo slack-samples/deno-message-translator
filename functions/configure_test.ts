@@ -1,9 +1,6 @@
-import * as mf from "https://deno.land/x/mock_fetch@0.3.0/mod.ts";
+import * as mf from "mock-fetch/mod.ts";
 import { SlackFunctionTester } from "deno-slack-sdk/mod.ts";
-import {
-  assertEquals,
-  fail,
-} from "https://deno.land/std@0.153.0/testing/asserts.ts";
+import { assertEquals } from "std/testing/asserts.ts";
 import handler from "./configure.ts";
 
 // Replaces globalThis.fetch with the mocked copy
@@ -118,13 +115,10 @@ Deno.test("Fail to open a modal with an invalid token", async () => {
     reacjilatorWorkflowCallbackId: "reacjilator",
   };
   const token = "invalid";
-  try {
-    await handler(createContext({ inputs, token }));
-    fail("Exception should be thrown here");
-  } catch (e) {
-    assertEquals(
-      e.message,
-      "Failed to open a modal (error: invalid_auth)",
-    );
-  }
+  const { outputs, error } = await handler(createContext({ inputs, token }));
+  assertEquals(outputs, undefined);
+  assertEquals(
+    error,
+    "Failed to open a modal in the configurator workflow. Contact the app maintainers with the following information - (error: invalid_auth)",
+  );
 });

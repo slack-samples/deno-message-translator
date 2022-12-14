@@ -45,7 +45,9 @@ export default SlackFunction(def, async ({
     targetTrigger.channel_ids,
   );
   if (error) {
-    return { error };
+    const errorMessage =
+      `Maintenance job failed! An error occurred when joining any of the channels (${targetTrigger.channel_ids}) due to ${error}.`;
+    return { error: errorMessage };
   } else {
     return { outputs: {} };
   }
