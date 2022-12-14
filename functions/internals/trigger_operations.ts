@@ -3,6 +3,7 @@ import { SlackAPIClient } from "deno-slack-api/types.ts";
 export async function findTriggerToUpdate(
   client: SlackAPIClient,
   workflowCallbackId: string,
+  debugMode: boolean,
 ) {
   // Check the existing triggers for this workflow
   const allTriggers = await client.workflows.triggers.list({ is_owner: true });
@@ -19,7 +20,9 @@ export async function findTriggerToUpdate(
       }
     }
   }
-  console.log(`triggerToUpdate: ${JSON.stringify(triggerToUpdate)}`);
+  if (debugMode) {
+    console.log(`The trigger to update: ${JSON.stringify(triggerToUpdate)}`);
+  }
   return triggerToUpdate;
 }
 
@@ -51,7 +54,9 @@ export async function createOrUpdateTrigger(
       inputs: triggerInputs,
     });
     if (creation.error) {
-      throw new Error(JSON.stringify(creation));
+      throw new Error(
+        `Failed to create a trigger! (response: ${JSON.stringify(creation)})`,
+      );
     }
     console.log(`A new trigger created: ${JSON.stringify(creation)}`);
   } else {
@@ -68,7 +73,9 @@ export async function createOrUpdateTrigger(
       inputs: triggerInputs,
     });
     if (update.error) {
-      throw new Error(JSON.stringify(update));
+      throw new Error(
+        `Failed to update a trigger! (response: ${JSON.stringify(update)})`,
+      );
     }
     console.log(`A new trigger updated: ${JSON.stringify(update)}`);
   }
@@ -77,8 +84,9 @@ export async function createOrUpdateTrigger(
 export async function joinAllChannels(
   client: SlackAPIClient,
   channelIds: string[],
+  debugMode: boolean,
 ) {
-  const futures = channelIds.map((c) => joinChannel(client, c));
+  const futures = channelIds.map((c) => joinChannel(client, c, debugMode));
   const results = (await Promise.all(futures)).filter((r) => r !== undefined);
   if (results.length > 0) {
     return results[0];
@@ -89,11 +97,12 @@ export async function joinAllChannels(
 async function joinChannel(
   client: SlackAPIClient,
   channelId: string,
+  debugMode: boolean,
 ) {
-  const response = await client.conversations.join({
-    channel: channelId,
-  });
-  console.log(`conversations.join API result: ${JSON.stringify(response)}`);
+  const response = await client.conversations.join({ channel: channelId });
+  if (debugMode) {
+    console.log(`conversations.join API result: ${JSON.stringify(response)}`);
+  }
   if (response.error) {
     const error = `Failed to join <#${channelId}> due to ${response.error}`;
     console.log(error);

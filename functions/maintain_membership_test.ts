@@ -92,6 +92,7 @@ const { createContext } = SlackFunctionTester("my-function");
 
 Deno.test("Join the channels", async () => {
   const inputs = { reacjilatorWorkflowCallbackId: "reacjilator" };
-  const { outputs } = await handler(createContext({ inputs }));
+  const env = { DEBUG_MODE: "false" };
+  const { outputs } = await handler(createContext({ inputs, env }));
   assertEquals(outputs, {});
 });

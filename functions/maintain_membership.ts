@@ -3,7 +3,8 @@ import { SlackAPI } from "deno-slack-api/mod.ts";
 import {
   findTriggerToUpdate,
   joinAllChannels,
-} from "./internals/trigger-operations.ts";
+} from "./internals/trigger_operations.ts";
+import { isDebugMode } from "./internals/debug_mode.ts";
 
 export const def = DefineFunction({
   callback_id: "maintain-membership",
@@ -24,11 +25,14 @@ export const def = DefineFunction({
 export default SlackFunction(def, async ({
   inputs,
   token,
+  env,
 }) => {
+  const debugMode = isDebugMode(env);
   const client = SlackAPI(token);
   const targetTrigger = await findTriggerToUpdate(
     client,
     inputs.reacjilatorWorkflowCallbackId,
+    debugMode,
   );
   if (
     targetTrigger === undefined ||
@@ -43,6 +47,7 @@ export default SlackFunction(def, async ({
   const error = await joinAllChannels(
     client,
     targetTrigger.channel_ids,
+    debugMode,
   );
   if (error) {
     const errorMessage =

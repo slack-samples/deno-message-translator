@@ -4,7 +4,8 @@ import {
   createOrUpdateTrigger,
   findTriggerToUpdate,
   joinAllChannels,
-} from "./internals/trigger-operations.ts";
+} from "./internals/trigger_operations.ts";
+import { isDebugMode } from "./internals/debug_mode.ts";
 
 export const def = DefineFunction({
   callback_id: "configure",
@@ -26,7 +27,9 @@ export const def = DefineFunction({
 export default SlackFunction(def, async ({
   inputs,
   token,
+  env,
 }) => {
+  const debugMode = isDebugMode(env);
   // ---------------------------
   // Open a modal for configuring the channel list
   // ---------------------------
@@ -34,8 +37,11 @@ export default SlackFunction(def, async ({
   const triggerToUpdate = await findTriggerToUpdate(
     client,
     inputs.reacjilatorWorkflowCallbackId,
+    debugMode,
   );
-  console.log(`triggerToUpdate: ${JSON.stringify(triggerToUpdate)}`);
+  if (debugMode) {
+    console.log(`triggerToUpdate: ${JSON.stringify(triggerToUpdate)}`);
+  }
 
   const channelIds = triggerToUpdate?.channel_ids != undefined
     ? triggerToUpdate.channel_ids
@@ -47,7 +53,9 @@ export default SlackFunction(def, async ({
     view: buildModalView(channelIds),
   });
   if (!response.ok) {
-    console.log(JSON.stringify(response, null, 2));
+    if (debugMode) {
+      console.log(`views.open response: ${JSON.stringify(response)}`);
+    }
     const error =
       `Failed to open a modal in the configurator workflow. Contact the app maintainers with the following information - (error: ${response.error})`;
     return { error };
@@ -62,7 +70,8 @@ export default SlackFunction(def, async ({
   // ---------------------------
   .addViewSubmissionHandler(
     ["configure-workflow"],
-    async ({ view, inputs, token }) => {
+    async ({ view, inputs, token, env }) => {
+      const debugMode = isDebugMode(env);
       const { reacjilatorWorkflowCallbackId } = inputs;
       const channelIds = view.state.values.block.channels.selected_channels;
 
@@ -73,6 +82,7 @@ export default SlackFunction(def, async ({
         const triggerToUpdate = await findTriggerToUpdate(
           client,
           inputs.reacjilatorWorkflowCallbackId,
+          debugMode,
         );
         // If the trigger already exists, we update it.
         // Otherwise, we create a new one.
@@ -87,6 +97,7 @@ export default SlackFunction(def, async ({
         const error = await joinAllChannels(
           client,
           channelIds,
+          debugMode,
         );
         if (error) {
           modalMessage = error;

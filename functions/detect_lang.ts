@@ -1,4 +1,5 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
+import { isDebugMode } from "./internals/debug_mode.ts";
 
 export const def = DefineFunction({
   callback_id: "detect-lang",
@@ -16,8 +17,12 @@ export const def = DefineFunction({
 
 export default SlackFunction(def, ({
   inputs,
+  env,
 }) => {
-  console.log(`detect-lang inputs: ${JSON.stringify(inputs)}`);
+  const debugMode = isDebugMode(env);
+  if (debugMode) {
+    console.log(`detect-lang inputs: ${JSON.stringify(inputs)}`);
+  }
   const reactionName = inputs.reaction;
   let lang: string | undefined = undefined;
   if (reactionName.match(/flag-/)) {

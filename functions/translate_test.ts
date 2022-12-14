@@ -87,7 +87,7 @@ Deno.test("No message found", async () => {
     messageTs: "1670566778.964519",
     lang: "ja",
   };
-  const env = { DEEPL_AUTH_KEY: "valid" };
+  const env = { DEEPL_AUTH_KEY: "valid", DEBUG_MODE: "false" };
   const token = "empty-response";
   const { outputs } = await handler(createContext({ inputs, env, token }));
   assertEquals(outputs, {});
@@ -99,7 +99,7 @@ Deno.test("Translate a message successfully", async () => {
     messageTs: "1670566778.964519",
     lang: "ja",
   };
-  const env = { DEEPL_AUTH_KEY: "valid" };
+  const env = { DEEPL_AUTH_KEY: "valid", DEBUG_MODE: "false" };
   const token = "valid";
   const { outputs } = await handler(createContext({ inputs, env, token }));
   assertEquals(outputs, { ts: "1111.2222" });
@@ -111,7 +111,7 @@ Deno.test("Fail to translate with an invalid auth key", async () => {
     messageTs: "1670566778.964519",
     lang: "ja",
   };
-  const env = { DEEPL_AUTH_KEY: "invalid" };
+  const env = { DEEPL_AUTH_KEY: "invalid", DEBUG_MODE: "false" };
   const token = "valid";
   const { outputs, error } = await handler(
     createContext({ inputs, env, token }),

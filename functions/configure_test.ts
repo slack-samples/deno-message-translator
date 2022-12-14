@@ -105,7 +105,8 @@ Deno.test("Open a modal successfully", async () => {
     reacjilatorWorkflowCallbackId: "reacjilator",
   };
   const token = "valid";
-  const { outputs } = await handler(createContext({ inputs, token }));
+  const env = { DEBUG_MODE: "false" };
+  const { outputs } = await handler(createContext({ inputs, token, env }));
   assertEquals(outputs, undefined);
 });
 
@@ -115,7 +116,10 @@ Deno.test("Fail to open a modal with an invalid token", async () => {
     reacjilatorWorkflowCallbackId: "reacjilator",
   };
   const token = "invalid";
-  const { outputs, error } = await handler(createContext({ inputs, token }));
+  const env = { DEBUG_MODE: "false" };
+  const { outputs, error } = await handler(
+    createContext({ inputs, token, env }),
+  );
   assertEquals(outputs, undefined);
   assertEquals(
     error,

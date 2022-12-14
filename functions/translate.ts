@@ -1,6 +1,7 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { SlackAPI } from "deno-slack-api/mod.ts";
 import { SlackAPIClient } from "deno-slack-api/types.ts";
+import { isDebugMode } from "./internals/debug_mode.ts";
 
 export const def = DefineFunction({
   callback_id: "translate",
@@ -25,7 +26,10 @@ export default SlackFunction(def, async ({
   token,
   env,
 }) => {
-  console.log(`translate inputs: ${JSON.stringify(inputs)}`);
+  const debugMode = isDebugMode(env);
+  if (debugMode) {
+    console.log(`translate inputs: ${JSON.stringify(inputs)}`);
+  }
   const emptyOutputs = { outputs: {} };
   if (inputs.lang === undefined) {
     // no language specified by the reaction
@@ -52,7 +56,11 @@ export default SlackFunction(def, async ({
       inclusive: true,
     });
   }
-  console.log(`Find the target: ${JSON.stringify(translationTargetResponse)}`);
+  if (debugMode) {
+    console.log(
+      `Find the target: ${JSON.stringify(translationTargetResponse)}`,
+    );
+  }
 
   if (translationTargetResponse.error) {
     // If you see this log message, perhaps you need to invite this app to the channel
@@ -108,7 +116,9 @@ export default SlackFunction(def, async ({
     return { error };
   }
   const translationResult = await deeplResponse.json();
-  console.log(`translation result: ${JSON.stringify(translationResult)}`);
+  if (debugMode) {
+    console.log(`translation result: ${JSON.stringify(translationResult)}`);
+  }
 
   if (
     !translationResult ||
