@@ -39,7 +39,10 @@ export default SlackFunction(def, async ({
     limit: 1,
     inclusive: true,
   });
-  if (translationTargetResponse.messages.length === 0) {
+  if (
+    !translationTargetResponse.messages ||
+    translationTargetResponse.messages.length === 0
+  ) {
     // To fetch a reply message
     // in a compatible way with the latest server-side behavior
     translationTargetResponse = await client.conversations.replies({
