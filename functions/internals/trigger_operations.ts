@@ -77,7 +77,7 @@ export async function createOrUpdateTrigger(
         `Failed to update a trigger! (response: ${JSON.stringify(update)})`,
       );
     }
-    console.log(`A new trigger updated: ${JSON.stringify(update)}`);
+    console.log(`The trigger updated: ${JSON.stringify(update)}`);
   }
 }
 
