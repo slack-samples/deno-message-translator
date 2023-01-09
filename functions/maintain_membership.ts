@@ -1,5 +1,4 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
-import { SlackAPI } from "deno-slack-api/mod.ts";
 import {
   findTriggerToUpdate,
   joinAllChannels,
@@ -22,13 +21,8 @@ export const def = DefineFunction({
   },
 });
 
-export default SlackFunction(def, async ({
-  inputs,
-  token,
-  env,
-}) => {
+export default SlackFunction(def, async ({ inputs, client, env }) => {
   const debugMode = isDebugMode(env);
-  const client = SlackAPI(token);
   const targetTrigger = await findTriggerToUpdate(
     client,
     inputs.reacjilatorWorkflowCallbackId,

@@ -1,5 +1,4 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
-import { SlackAPI } from "deno-slack-api/mod.ts";
 import { SlackAPIClient } from "deno-slack-api/types.ts";
 import { isDebugMode } from "./internals/debug_mode.ts";
 
@@ -21,7 +20,7 @@ export const def = DefineFunction({
   },
 });
 
-export default SlackFunction(def, async ({ inputs, token, env }) => {
+export default SlackFunction(def, async ({ inputs, client, env }) => {
   const debugMode = isDebugMode(env);
   if (debugMode) {
     console.log(`translate inputs: ${JSON.stringify(inputs)}`);
@@ -32,7 +31,6 @@ export default SlackFunction(def, async ({ inputs, token, env }) => {
     console.log("Skipped as no lang detected");
     return emptyOutputs; // this is not an error
   }
-  const client: SlackAPIClient = SlackAPI(token);
   let translationTargetResponse = await client.conversations.history({
     channel: inputs.channelId,
     oldest: inputs.messageTs,

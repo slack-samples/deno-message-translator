@@ -1,5 +1,4 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
-import { SlackAPI } from "deno-slack-api/mod.ts";
 import {
   createOrUpdateTrigger,
   findTriggerToUpdate,
@@ -24,16 +23,11 @@ export const def = DefineFunction({
   },
 });
 
-export default SlackFunction(def, async ({
-  inputs,
-  token,
-  env,
-}) => {
+export default SlackFunction(def, async ({ inputs, client, env }) => {
   const debugMode = isDebugMode(env);
   // ---------------------------
   // Open a modal for configuring the channel list
   // ---------------------------
-  const client = SlackAPI(token);
   const triggerToUpdate = await findTriggerToUpdate(
     client,
     inputs.reacjilatorWorkflowCallbackId,
@@ -70,12 +64,11 @@ export default SlackFunction(def, async ({
   // ---------------------------
   .addViewSubmissionHandler(
     ["configure-workflow"],
-    async ({ view, inputs, token, env }) => {
+    async ({ view, inputs, client, env }) => {
       const debugMode = isDebugMode(env);
       const { reacjilatorWorkflowCallbackId } = inputs;
       const channelIds = view.state.values.block.channels.selected_channels;
 
-      const client = SlackAPI(token);
       let modalMessage =
         "*You're all set!*\n\nThis translator is now available for the channels :white_check_mark:";
       try {
