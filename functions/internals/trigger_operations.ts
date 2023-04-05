@@ -1,4 +1,4 @@
-import { SlackAPIClient } from "deno-slack-api/types.ts";
+import { SlackAPIClient } from "deno-slack-sdk/types.ts";
 
 export async function findTriggerToUpdate(
   client: SlackAPIClient,
