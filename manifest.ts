@@ -38,6 +38,7 @@ export default Manifest({
     "chat:write",
     "channels:history",
     "reactions:read",
+    "groups:history",
     // configurator
     "triggers:read",
     "triggers:write",

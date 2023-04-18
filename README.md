@@ -1,7 +1,7 @@
 # Deno Message Translator App (powered by DeepL API)
 
 This app contains a sample TypeScript project for use on Slack's
-[next-generation hosted platform](https://api.slack.com/future). The project
+[next-generation platform](https://api.slack.com/future). The project
 demonstrates a simple message translator app. The app is added to designated
 channels by running a configurator workflow. Once added to specific channel(s),
 the app will translate any message there when a user adds a reaction to the
@@ -49,8 +49,8 @@ requires any of [the Slack paid plans](https://slack.com/pricing).
 
 Also, this app needs a valid DeepL API access token for text translation API
 calls. Head to
-[the DeepL API's document site](https://www.deepl.com/en/docs-api) and create
-[your own API account](https://www.deepl.com/account/summary).
+[the DeepL API's document site](https://www.deepl.com/en/docs-api) and
+[create your own API account](https://www.deepl.com/pro-checkout/account?productId=1200&yearly=false&trial=false).
 
 Please note that **API accounts are different from DeepL's regular accounts**.
 Even when you already have an account for using the text translation on the
@@ -91,7 +91,7 @@ When you deploy your app later, you can set the same value by running the
 following command:
 
 ```bash
-slack env add DEEPL_AUTH_KEY (you token here)
+slack env add DEEPL_AUTH_KEY (your token here)
 ```
 
 ## Create a link trigger for configuring your app
@@ -112,16 +112,19 @@ that Shortcut URLs will be different across each workspace, as well as between
 the Workspace that you'd like to create the trigger in. Each Workspace has a
 development version (denoted by `(dev)`), as well as a deployed version.
 
-To create a link trigger for the workflow that enables end-users to configure
-the translator workflow in this template, run the following command:
+When you `run` or `deploy` your project, the CLI will prompt you to create a
+link trigger; select the trigger definition file for configuring the translator
+workflow, `triggers/configurator.ts`.
+
+To manually create a link trigger instead, run the following command:
 
 ```zsh
 $ slack trigger create --trigger-def triggers/configurator.ts
 ```
 
-After selecting a Workspace, the output provided will include the link trigger
-Shortcut URL. Copy and paste this URL into a channel as a message, or add it as
-a bookmark in a channel of the Workspace you selected.
+After the trigger is created, the CLI will display the link trigger Shortcut
+URL. Copy and paste this URL into a channel as a message, or add it as a
+bookmark in a channel of the Workspace you selected.
 
 **Note: this link won't run the workflow until the app is either running locally
 or deployed!** Read on to learn how to run your app locally and eventually
