@@ -37,14 +37,14 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     console.log(`triggerToUpdate: ${JSON.stringify(triggerToUpdate)}`);
   }
 
-  const channelIds = triggerToUpdate?.channel_ids != undefined
+  const conversationIds = triggerToUpdate?.channel_ids != undefined
     ? triggerToUpdate.channel_ids
     : [];
 
   // Open the modal to configure the channel list to enable this workflow
   const response = await client.views.open({
     interactivity_pointer: inputs.interactivityPointer,
-    view: buildModalView(channelIds),
+    view: buildModalView(conversationIds),
   });
   if (!response.ok) {
     if (debugMode) {
@@ -67,33 +67,38 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     async ({ view, inputs, client, env }) => {
       const debugMode = isDebugMode(env);
       const { reacjilatorWorkflowCallbackId } = inputs;
-      const channelIds = view.state.values.block.channels.selected_channels;
+      const conversationIds =
+        view.state.values.block.channels.selected_conversations;
 
       let modalMessage =
         "*You're all set!*\n\nThis translator is now available for the channels :white_check_mark:";
       try {
-        const triggerToUpdate = await findTriggerToUpdate(
-          client,
-          inputs.reacjilatorWorkflowCallbackId,
-          debugMode,
-        );
-        // If the trigger already exists, we update it.
-        // Otherwise, we create a new one.
-        await createOrUpdateTrigger(
-          client,
-          reacjilatorWorkflowCallbackId,
-          channelIds,
-          triggerToUpdate,
-        );
-        // This app's bot user joins all the channels
-        // to perform API calls for the channels
+        // Try to join all the channels first.
+        // If the bot fails to join any of them (especially private channels, DMs),
+        // this listener function skips updating the trigger.
         const error = await joinAllChannels(
           client,
-          channelIds,
+          conversationIds,
           debugMode,
         );
         if (error) {
           modalMessage = error;
+        } else {
+          // Only when the bot is in all the specified channels,
+          // we can set the channel ID list to the trigger
+          const triggerToUpdate = await findTriggerToUpdate(
+            client,
+            inputs.reacjilatorWorkflowCallbackId,
+            debugMode,
+          );
+          // If the trigger already exists, we update it.
+          // Otherwise, we create a new one.
+          await createOrUpdateTrigger(
+            client,
+            reacjilatorWorkflowCallbackId,
+            conversationIds,
+            triggerToUpdate,
+          );
         }
       } catch (e) {
         console.log(e);
@@ -121,7 +126,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
 // Internal functions
 // ---------------------------
 
-function buildModalView(channelIds: string[]) {
+function buildModalView(conversationIds: string[]) {
   return {
     "type": "modal",
     "callback_id": "configure-workflow",
@@ -139,12 +144,19 @@ function buildModalView(channelIds: string[]) {
         "type": "input",
         "block_id": "block",
         "element": {
-          "type": "multi_channels_select",
+          "type": "multi_conversations_select",
           "placeholder": {
             "type": "plain_text",
             "text": "Select channels to add",
           },
-          "initial_channels": channelIds,
+          "initial_conversations": conversationIds,
+          "filter": {
+            // By default, this select menu does not list DMs to eliminate users' confusion
+            // but if a user does understand what DMs can be supported, removing this "include" filter should work for them.
+            "include": ["public", "private"],
+            "exclude_external_shared_channels": false,
+            "exclude_bot_users": true,
+          },
           "action_id": "channels",
         },
         "label": {
