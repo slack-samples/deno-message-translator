@@ -37,10 +37,18 @@ export default Manifest({
     "commands",
     "chat:write",
     "channels:history",
+    "groups:history",
+    // Technically, the app works for DMs too but disabled by default to avoid end-user confusion
+    // "mpim:history",
+    // "im:history",
     "reactions:read",
     // configurator
     "triggers:read",
     "triggers:write",
     "channels:join",
+    "groups:read",
+    // Technically, the app works for DMs too but disabled by default to avoid end-user confusion
+    // "mpim:read",
+    // "im:read",
   ],
 });

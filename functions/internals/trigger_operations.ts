@@ -104,7 +104,25 @@ async function joinChannel(
     console.log(`conversations.join API result: ${JSON.stringify(response)}`);
   }
   if (response.error) {
-    const error = `Failed to join <#${channelId}> due to ${response.error}`;
+    if (response.error === "method_not_supported_for_channel_type") {
+      const convo = await client.conversations.info({ channel: channelId });
+      if (debugMode) {
+        console.log(
+          `conversations.info API result with private channel: ${
+            JSON.stringify(convo)
+          }`,
+        );
+      }
+      if (!convo.error) {
+        return;
+      }
+    }
+    const authTest = await client.auth.test({});
+    if (debugMode) {
+      console.log(`auth.test API result: ${JSON.stringify(authTest)}`);
+    }
+    const error =
+      `:warning: Failed to join <#${channelId}> due to "${response.error}" error. This workflow is unable to add <@${authTest.user_id}> to private channels and DMs. For those conversations, please invite the bot user in advance :bow:`;
     console.log(error);
     return error;
   }
