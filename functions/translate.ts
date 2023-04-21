@@ -149,7 +149,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     if (deeplResponse.status == 403) {
       // If the status code is 403, the given auth key is not valid
       const error =
-        `Translating a mesage failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: ${deeplResponse.status}, target text: ${
+        `Translating a message failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: ${deeplResponse.status}, target text: ${
           targetText.substring(0, 30)
         }...)`;
       console.log(error);
@@ -157,7 +157,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     }
     const body = await deeplResponse.text();
     const error =
-      `Translating a mesage failed! Contact the app maintainers with the following information - (status: ${deeplResponse.status}, body: ${body}, target text: ${
+      `Translating a message failed! Contact the app maintainers with the following information - (status: ${deeplResponse.status}, body: ${body}, target text: ${
         targetText.substring(0, 30)
       }...)`;
     console.log(error);
@@ -175,7 +175,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
   ) {
     const printableResponse = JSON.stringify(translationResult);
     const error =
-      `Translating a mesage failed! Contact the app maintainers with the following information - (DeepL API response: ${printableResponse})`;
+      `Translating a message failed! Contact the app maintainers with the following information - (DeepL API response: ${printableResponse})`;
     console.log(error);
     return { error };
   }
