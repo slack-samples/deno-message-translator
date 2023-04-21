@@ -119,6 +119,6 @@ Deno.test("Fail to translate with an invalid auth key", async () => {
   assertEquals(outputs, undefined);
   assertEquals(
     error,
-    "Translating a mesage failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: 403, target text: Make work life simpler, more p...)",
+    "Translating a message failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: 403, target text: Make work life simpler, more p...)",
   );
 });
