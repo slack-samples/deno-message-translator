@@ -1,4 +1,5 @@
 import { Trigger } from "deno-slack-sdk/types.ts";
+import { TriggerContextData, TriggerTypes } from "deno-slack-api/mod.ts";
 import workflowDef from "../workflows/configurator.ts";
 
 /**
@@ -7,10 +8,12 @@ import workflowDef from "../workflows/configurator.ts";
  * sharing this link URL in a private channel would be recommended.
  */
 const trigger: Trigger<typeof workflowDef.definition> = {
-  type: "shortcut",
+  type: TriggerTypes.Shortcut,
   name: "Configurator for DeepL Translator",
   workflow: `#/workflows/${workflowDef.definition.callback_id}`,
-  inputs: { interactivity: { value: "{{data.interactivity}}" } },
+  inputs: {
+    interactivity: { value: TriggerContextData.Shortcut.interactivity },
+  },
 };
 
 export default trigger;

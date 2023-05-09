@@ -1,11 +1,12 @@
 import { Trigger } from "deno-slack-sdk/types.ts";
+import { TriggerTypes } from "deno-slack-api/mod.ts";
 import workflowDef from "../workflows/maintenance_job.ts";
 
 /**
  * A trigger that periodically starts the "maintenance-job" workflow.
  */
 const trigger: Trigger<typeof workflowDef.definition> = {
-  type: "scheduled",
+  type: TriggerTypes.Scheduled,
   name: "Trigger a scheduled maintenance job",
   workflow: `#/workflows/${workflowDef.definition.callback_id}`,
   inputs: {},
