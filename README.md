@@ -27,9 +27,7 @@ To learn the full list of the supported languages, head to
 
 ## Included Workflows
 
-- **Configurator:** Configure what channels the app can translate messages in -
-  if added to a private channel, please note tat you may need to manually add
-  the app to the channel in order for it to work.
+- **Configurator:** Configure which channels the app can translate messages in. If added to a private channel, please note that you may need to manually add the app to that channel in order for it to work.
 - **Reacjilator:** Runs when a user reacts to a message in a channel where the
   app is added. If the reaction is a supported flag emoji (ex: 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵),
   then the app will respond in the message thread with a translated message in a
