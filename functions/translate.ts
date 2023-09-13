@@ -31,25 +31,13 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     console.log("Skipped as no lang detected");
     return emptyOutputs; // this is not an error
   }
-  let translationTargetResponse = await client.conversations.history({
+  // Fetch the target message to translate
+  const translationTargetResponse = await client.conversations.replies({
     channel: inputs.channelId,
-    oldest: inputs.messageTs,
+    ts: inputs.messageTs,
     limit: 1,
     inclusive: true,
   });
-  if (
-    !translationTargetResponse.messages ||
-    translationTargetResponse.messages.length === 0
-  ) {
-    // To fetch a reply message
-    // in a compatible way with the latest server-side behavior
-    translationTargetResponse = await client.conversations.replies({
-      channel: inputs.channelId,
-      ts: inputs.messageTs,
-      limit: 1,
-      inclusive: true,
-    });
-  }
   if (debugMode) {
     console.log(
       `Find the target: ${JSON.stringify(translationTargetResponse)}`,

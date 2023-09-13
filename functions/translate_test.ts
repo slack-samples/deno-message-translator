@@ -6,7 +6,7 @@ import handler from "./translate.ts";
 // Replaces globalThis.fetch with the mocked copy
 mf.install();
 
-mf.mock("POST@/api/conversations.history", (args) => {
+mf.mock("POST@/api/conversations.replies", (args) => {
   const authHeader = args.headers.get("Authorization");
   if (authHeader === "Bearer empty-response") {
     return new Response(JSON.stringify({ ok: true, messages: [] }), {
@@ -44,12 +44,6 @@ mf.mock("POST@/api/conversations.history", (args) => {
       status: 200,
     },
   );
-});
-
-mf.mock("POST@/api/conversations.replies", () => {
-  return new Response(JSON.stringify({ ok: true, messages: [] }), {
-    status: 200,
-  });
 });
 
 mf.mock("POST@/api/chat.postMessage", () => {
