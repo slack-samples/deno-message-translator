@@ -122,7 +122,7 @@ async function joinChannel(
       console.log(`auth.test API result: ${JSON.stringify(authTest)}`);
     }
     const error =
-      `:warning: Failed to join <#${channelId}> due to "${response.error}" error. This workflow is unable to add <@${authTest.user_id}> to private channels and DMs. For those conversations, please invite the bot user in advance :bow:`;
+      `*:warning: Failed to join <#${channelId}> due to "${response.error}" error!*\n\nThis workflow is unable to add <@${authTest.user_id}> to private channels and DMs. For those conversations, please invite the bot user in advance :bow:`;
     console.log(error);
     return error;
   }
