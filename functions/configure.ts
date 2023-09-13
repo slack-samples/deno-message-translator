@@ -102,7 +102,9 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
         }
       } catch (e) {
         console.log(e);
-        modalMessage = e;
+        modalMessage =
+          "*:warning: Apologies! Failed to configure this app due to the following error:*\n>" +
+          e;
       }
       // nothing to return if you want to close this modal
       return buildModalUpdateResponse(modalMessage);
