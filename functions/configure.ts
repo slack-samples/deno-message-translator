@@ -5,6 +5,7 @@ import {
   joinAllChannels,
 } from "./internals/trigger_operations.ts";
 import { isDebugMode } from "./internals/debug_mode.ts";
+import { upTo100ReactionToLang } from "./detect_lang.ts";
 
 export const def = DefineFunction({
   callback_id: "configure",
@@ -40,11 +41,18 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
   const conversationIds = triggerToUpdate?.channel_ids != undefined
     ? triggerToUpdate.channel_ids
     : [];
+  const currentFilterInputs: { statement: string }[] | undefined =
+    triggerToUpdate?.filter?.root?.inputs;
+  const reactions = currentFilterInputs != undefined
+    ? currentFilterInputs.map((i) =>
+      i.statement.replace("{{data.reaction}} == '", "").replace("'", "")
+    )
+    : [];
 
   // Open the modal to configure the channel list to enable this workflow
   const response = await client.views.open({
     interactivity_pointer: inputs.interactivityPointer,
-    view: buildModalView(conversationIds),
+    view: buildModalView(conversationIds, reactions),
   });
   if (!response.ok) {
     if (debugMode) {
@@ -67,8 +75,17 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     async ({ view, inputs, client, env }) => {
       const debugMode = isDebugMode(env);
       const { reacjilatorWorkflowCallbackId } = inputs;
-      const conversationIds =
-        view.state.values.block.channels.selected_conversations;
+      const values = view.state.values;
+      const conversationIds = values.block1.channels.selected_conversations;
+      const selectedReactions: { value: string }[] =
+        values.block2.reactions.selected_options || [];
+      const reactions = selectedReactions.map((o) => o.value);
+      if (reactions.length > 9) {
+        return {
+          response_action: "errors",
+          errors: { block2: "You can set up to 9 emojis" },
+        };
+      }
 
       let modalMessage =
         "*You're all set!*\n\nThis translator is now available for the channels :white_check_mark:";
@@ -97,6 +114,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
             client,
             reacjilatorWorkflowCallbackId,
             conversationIds,
+            reactions,
             triggerToUpdate,
           );
         }
@@ -128,7 +146,36 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
 // Internal functions
 // ---------------------------
 
-function buildModalView(conversationIds: string[]) {
+function buildModalView(conversationIds: string[], reactions: string[]) {
+  const options = Object.keys(upTo100ReactionToLang).map((r) => {
+    return {
+      "text": { "type": "plain_text", "text": `:flag-${r}:` },
+      "value": r,
+    };
+  });
+  // deno-lint-ignore no-explicit-any
+  const emojisBlock: any = {
+    "type": "input",
+    "block_id": "block2",
+    "element": {
+      "type": "multi_static_select",
+      "placeholder": {
+        "type": "plain_text",
+        // An event trigger's filter object can accept only 18 statements.
+        // This app needs to respond to both :flag-jp: and :jp:
+        // Thus, users can use up to 9 emojis
+        "text": "Choose up to 9 emojis",
+      },
+      "options": options,
+      "action_id": "reactions",
+    },
+    "optional": true,
+    "label": { "type": "plain_text", "text": "Reactions to use" },
+  };
+  const selectedOptions = options.filter((o) => reactions.includes(o.value));
+  if (selectedOptions.length > 0) {
+    emojisBlock.element.initial_options = selectedOptions;
+  }
   return {
     "type": "modal",
     "callback_id": "configure-workflow",
@@ -144,7 +191,7 @@ function buildModalView(conversationIds: string[]) {
     "blocks": [
       {
         "type": "input",
-        "block_id": "block",
+        "block_id": "block1",
         "element": {
           "type": "multi_conversations_select",
           "placeholder": {
@@ -165,6 +212,17 @@ function buildModalView(conversationIds: string[]) {
           "type": "plain_text",
           "text": "Channels to enable translator",
         },
+      },
+      emojisBlock,
+      {
+        "type": "context",
+        "elements": [
+          {
+            "type": "mrkdwn",
+            "text":
+              "Choosing thus allows this workflow to work in a more cost-efficient way, but it's optional. Also, we understand the list of emojis is not exhaustive. You can customize the code to include more emojis, up to 100.",
+          },
+        ],
       },
     ],
   };

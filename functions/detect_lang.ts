@@ -30,17 +30,17 @@ export default SlackFunction(def, ({
     const matched = reactionName.match(/(?!flag-\b)\b\w+/);
     if (matched != null) {
       const country = matched[0];
-      lang = reactionToLang[country];
+      lang = allReactionToLang[country];
     }
   } else {
     // jp, fr, etc.
-    lang = reactionToLang[reactionName];
+    lang = allReactionToLang[reactionName];
   }
   return { outputs: { lang } };
 });
 
 // data mapping between reaction names and language codes
-export const reactionToLang: Record<string, string> = {
+export const allReactionToLang: Record<string, string> = {
   ac: "en",
   ag: "en",
   ai: "en",
@@ -117,6 +117,7 @@ export const reactionToLang: Record<string, string> = {
   jp: "ja",
   ke: "en",
   ki: "en",
+  kr: "ko",
   kn: "en",
   ky: "en",
   lc: "en",
@@ -197,4 +198,28 @@ export const reactionToLang: Record<string, string> = {
   se: "sv",
   tr: "tr",
   ua: "uk",
+};
+
+// TODO: add more emojis to this list
+export const upTo100ReactionToLang: Record<string, string> = {
+  cn: "zh",
+  de: "de",
+  es: "es",
+  fr: "fr",
+  gb: "en",
+  it: "it",
+  jp: "ja",
+  kr: "ko",
+  pl: "pl",
+  pt: "pt",
+  ru: "ru",
+  us: "en",
+  bg: "bg",
+  fi: "fi",
+  hu: "hu",
+  id: "id",
+  lt: "lt",
+  ro: "ro",
+  sk: "sk",
+  tr: "tr",
 };

@@ -36,14 +36,30 @@ export async function createOrUpdateTrigger(
   client: SlackAPIClient,
   workflowCallbackId: string,
   channelIds: string[],
+  reactions: string[],
   triggerToUpdate?: Record<string, string>,
 ) {
   // deno-lint-ignore no-explicit-any
   const channel_ids = channelIds as any;
+  const filterStatements: { statement: string }[] = [];
+  if (reactions) {
+    for (const reaction of reactions) {
+      if (filterStatements.length > 18) break;
+      for (
+        const statement of [
+          `{{data.reaction}} == '${reaction}'`,
+          `{{data.reaction}} == 'flag-${reaction}'`,
+        ]
+      ) {
+        filterStatements.push({ statement });
+      }
+    }
+  }
 
   if (triggerToUpdate === undefined) {
     // Create a new trigger
-    const creation = await client.workflows.triggers.create({
+    // deno-lint-ignore no-explicit-any
+    const parameters: any = {
       type: "event",
       name: "reaction_added event trigger",
       workflow: `#/workflows/${workflowCallbackId}`,
@@ -52,7 +68,14 @@ export async function createOrUpdateTrigger(
         channel_ids,
       },
       inputs: triggerInputs,
-    });
+    };
+    if (filterStatements.length > 0) {
+      parameters.event.filter = {
+        version: 1,
+        root: { operator: "OR", inputs: filterStatements },
+      };
+    }
+    const creation = await client.workflows.triggers.create(parameters);
     if (creation.error) {
       throw new Error(
         `Failed to create a trigger! (response: ${JSON.stringify(creation)})`,
@@ -61,7 +84,8 @@ export async function createOrUpdateTrigger(
     console.log(`A new trigger created: ${JSON.stringify(creation)}`);
   } else {
     // Update the existing trigger
-    const update = await client.workflows.triggers.update({
+    // deno-lint-ignore no-explicit-any
+    const parameters: any = {
       trigger_id: triggerToUpdate.id,
       type: "event",
       name: "reaction_added event trigger",
@@ -71,7 +95,14 @@ export async function createOrUpdateTrigger(
         channel_ids,
       },
       inputs: triggerInputs,
-    });
+    };
+    if (filterStatements.length > 0) {
+      parameters.event.filter = {
+        version: 1,
+        root: { operator: "OR", inputs: filterStatements },
+      };
+    }
+    const update = await client.workflows.triggers.update(parameters);
     if (update.error) {
       throw new Error(
         `Failed to update a trigger! (response: ${JSON.stringify(update)})`,
