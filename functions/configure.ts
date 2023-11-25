@@ -159,6 +159,7 @@ function buildModalView(conversationIds: string[], reactions: string[]) {
     "block_id": "block2",
     "element": {
       "type": "multi_static_select",
+      "max_selected_items": 9,
       "placeholder": {
         "type": "plain_text",
         // An event trigger's filter object can accept only 18 statements.
