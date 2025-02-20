@@ -145,8 +145,6 @@ or deployed!**
 
 ### Usage
 
-<img src="https://user-images.githubusercontent.com/19658/206636945-e6078c32-0e81-422b-bb38-711d10f53b55.gif" width=500 />
-
 Once this app's bot user is added to a channel, adding reactions such as `:jp:`
 and `:fr:` results in posting translation results of the target message as
 replies in its thread.
