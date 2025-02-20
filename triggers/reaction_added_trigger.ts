@@ -8,8 +8,6 @@ import workflowDef from "../workflows/reacjilator.ts";
 
 /**
  * This is a sample trigger demonstrating how to configure the "reaction_added" event trigger.
- * This trigger works without any issues! but trigger.event.channel_ids needs to be hard-coded.
- * Thus, using the configurator workflow should be more convenient for most use cases.
  */
 const trigger: Trigger<typeof workflowDef.definition> = {
   type: TriggerTypes.Event,
@@ -18,8 +16,7 @@ const trigger: Trigger<typeof workflowDef.definition> = {
   workflow: `#/workflows/${workflowDef.definition.callback_id}`,
   event: {
     event_type: TriggerEventTypes.ReactionAdded,
-    // TODO: Listing all the channels to enable here is required
-    channel_ids: ["CLT1F93TP"],
+    all_resources: true,
   },
   inputs: {
     channelId: { value: TriggerContextData.Event.ReactionAdded.channel_id },

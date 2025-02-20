@@ -27,15 +27,10 @@ To learn the full list of the supported languages, head to
 
 ## Included Workflows
 
-- **Configurator:** Configure which channels the app can translate messages in.
-  If added to a private channel, please note that you may need to manually add
-  the app to that channel in order for it to work.
 - **Reacjilator:** Runs when a user reacts to a message in a channel where the
   app is added. If the reaction is a supported flag emoji (ex: 🇺🇸, 🇪🇸, 🇫🇷, 🇯🇵),
   then the app will respond in the message thread with a translated message in a
   language corresponding to the flag a user reacted with.
-- **Maintenance job:** Runs daily to add the app back to channels where users
-  have manually removed the app. Recommended for production-grade operations.
 
 ## Setup
 
@@ -131,41 +126,30 @@ version (denoted by `(local)`), as well as a deployed version. _Triggers created
 in a local environment will only be available to use when running the
 application locally._
 
-### Link Triggers
+### Event Triggers
 
-A [link trigger](https://api.slack.com/automation/triggers/link) is a type of
-trigger that generates a **Shortcut URL** which, when posted in a channel or
-added as a bookmark, becomes a link. When clicked, the link trigger will run the
-associated workflow.
+This app requires a reaction_added event trigger. You can enable it by running
+the following command:
 
-Link triggers are _unique to each installed version of your app_. This means
-that Shortcut URLs will be different across each workspace, as well as between
+```bash
+slack trigger create --trigger-def triggers/reaction_added_trigger.ts
+```
+
+Triggers are _unique to each installed version of your app_. This means that
+Shortcut URLs will be different across each workspace, as well as between
 [locally run](#running-your-project-locally) and
 [deployed apps](#deploying-your-app).
 
-With link triggers, after selecting a workspace and environment, the output
-provided will include a Shortcut URL. Copy and paste this URL into a channel as
-a message, or add it as a bookmark in a channel of the workspace you selected.
-Interacting with this link will run the associated workflow.
-
 **Note: triggers won't run the workflow unless the app is either running locally
 or deployed!**
-
-### Manual Trigger Creation
-
-To manually create a trigger, use the following command:
-
-```zsh
-$ slack trigger create --trigger-def triggers/configurator.ts
-```
 
 ### Usage
 
 <img src="https://user-images.githubusercontent.com/19658/206636945-e6078c32-0e81-422b-bb38-711d10f53b55.gif" width=500 />
 
-Once the translator is added to a channel, adding reactions such as `:jp:` and
-`:fr:` results in posting translation results of the target message as replies
-in its thread.
+Once this app's bot user is added to a channel, adding reactions such as `:jp:`
+and `:fr:` results in posting translation results of the target message as
+replies in its thread.
 
 <img width="600" src="https://user-images.githubusercontent.com/19658/206638194-6eff88fa-05c1-4308-a180-0a547890aab6.png">
 
@@ -196,26 +180,9 @@ $ slack deploy
 ```
 
 When deploying for the first time, you'll be prompted to
-[create a new link trigger](#creating-triggers) for the deployed version of your
-app. When that trigger is invoked, the workflow should run just as it did when
-developing locally (but without requiring your server to be running).
-
-### Production Maintenance Job
-
-For production, we recommend enabling the included `maintenance_job.ts`
-workflow.
-
-The app's bot user must be a member of a channel in order to listen for events
-there. When you add a new channel in the configuration modal, the bot user
-automatically joins the channel. **However, anyone can remove the bot user from
-the channel at any time.**
-
-To enable a job that will re-add the bot user to channel, run the following
-command that generates a scheduled trigger to run daily:
-
-```zsh
-$ slack trigger create --trigger-def triggers/daily_maintenance_job.ts
-```
+[create a new event trigger](#creating-triggers) for the deployed version of
+your app. Please note that you need to add the production app's bot user to all
+the channels you'd like to enable the app.
 
 ## Viewing Activity Logs
 
