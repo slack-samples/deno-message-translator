@@ -52,14 +52,15 @@ export class StubFetch {
         for (const stubRequestHandler of this.stubs.values()) {
           try {
             // Clone the request for each assertion attempt to ensures the body can be read multiple times
-            const requestClone = request.clone();
-            const assertionResult = stubRequestHandler.assertion(requestClone);
+            const assertionResult = stubRequestHandler.assertion(
+              request.clone(),
+            );
 
             if (assertionResult instanceof Promise) {
               await assertionResult;
             }
 
-            return Promise.resolve(stubRequestHandler.response);
+            return Promise.resolve(stubRequestHandler.response.clone());
           } catch (_error) {
             // do nothing
           }
