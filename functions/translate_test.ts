@@ -1,19 +1,34 @@
-import * as mf from "mock-fetch/mod.ts";
 import { SlackFunctionTester } from "deno-slack-sdk/mod.ts";
-import { assertEquals } from "std/testing/asserts.ts";
+import { assert, assertEquals, assertNotEquals } from "@std/assert";
 import handler from "./translate.ts";
+import { StubFetch } from "./test_utils.ts";
 
-// Replaces globalThis.fetch with the mocked copy
-mf.install();
+// Replaces globalThis.fetch with the stub copy
+const stubFetch = new StubFetch();
+stubFetch.stub({
+  assertion: (req) => {
+    assertEquals(req.method, "POST");
+    assertEquals(
+      req.url,
+      "https://slack.com/api/conversations.replies",
+    );
+    assertEquals(req.headers.get("Authorization"), "Bearer empty-response");
+  },
+  response: new Response(JSON.stringify({ ok: true, messages: [] }), {
+    status: 200,
+  }),
+});
 
-mf.mock("POST@/api/conversations.replies", (args) => {
-  const authHeader = args.headers.get("Authorization");
-  if (authHeader === "Bearer empty-response") {
-    return new Response(JSON.stringify({ ok: true, messages: [] }), {
-      status: 200,
-    });
-  }
-  return new Response(
+stubFetch.stub({
+  assertion: (req) => {
+    assertEquals(req.method, "POST");
+    assertEquals(
+      req.url,
+      "https://slack.com/api/conversations.replies",
+    );
+    assertNotEquals(req.headers.get("Authorization"), "Bearer empty-response");
+  },
+  response: new Response(
     JSON.stringify({
       "ok": true,
       "oldest": "1670566778.964519",
@@ -43,21 +58,40 @@ mf.mock("POST@/api/conversations.replies", (args) => {
     {
       status: 200,
     },
-  );
+  ),
 });
 
-mf.mock("POST@/api/chat.postMessage", () => {
-  return new Response(JSON.stringify({ ok: true, ts: "1111.2222" }), {
+stubFetch.stub({
+  assertion: (req) => {
+    assertEquals(req.method, "POST");
+    assertEquals(
+      req.url,
+      "https://slack.com/api/chat.postMessage",
+    );
+  },
+  response: new Response(JSON.stringify({ ok: true, ts: "1111.2222" }), {
     status: 200,
-  });
+  }),
 });
 
-mf.mock("POST@/v2/translate", async (args) => {
-  const body = await args.formData();
-  if (body.get("auth_key") !== "valid") {
-    return new Response("", { status: 403 });
-  }
-  return new Response(
+stubFetch.stub({
+  assertion: async (req) => {
+    assertEquals(req.method, "POST");
+    assert(req.url.endsWith("/v2/translate"));
+    const body = await req.formData();
+    assertNotEquals(body.get("auth_key"), "valid");
+  },
+  response: new Response("", { status: 403 }),
+});
+
+stubFetch.stub({
+  assertion: async (req) => {
+    assertEquals(req.method, "POST");
+    assert(req.url.endsWith("/v2/translate"));
+    const body = await req.formData();
+    assertEquals(body.get("auth_key"), "valid");
+  },
+  response: new Response(
     JSON.stringify({
       translations: [
         {
@@ -70,7 +104,7 @@ mf.mock("POST@/v2/translate", async (args) => {
     {
       status: 200,
     },
-  );
+  ),
 });
 
 const { createContext } = SlackFunctionTester("my-function");
