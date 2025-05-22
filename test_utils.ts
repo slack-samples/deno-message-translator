@@ -37,14 +37,14 @@ export class UnmatchedRequestError extends Error {
 
 export class StubFetch {
   private stubs: Map<string, StubRequestHandler> = new Map();
-  private stubFetchInstance: Stub | null = null;
+  private stubFetchInstance: Stub;
 
   /**
    * Creates a new StubFetch instance and automatically installs it.
    * The global fetch function is replaced with the stub immediately upon creation.
    */
   constructor() {
-    this.install();
+    this.stubFetchInstance = this.install();
   }
 
   /**
@@ -127,7 +127,6 @@ export class StubFetch {
   restore(): void {
     if (this.stubFetchInstance) {
       this.stubFetchInstance.restore();
-      this.stubFetchInstance = null;
     }
   }
 }
