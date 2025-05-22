@@ -6,7 +6,7 @@ import { StubFetch } from "./test_utils.ts";
 // Replaces globalThis.fetch with the stub copy
 const stubFetch = new StubFetch();
 stubFetch.stub({
-  assertion: (req) => {
+  matches: (req) => {
     assertEquals(req.method, "POST");
     assertEquals(
       req.url,
@@ -20,7 +20,7 @@ stubFetch.stub({
 });
 
 stubFetch.stub({
-  assertion: (req) => {
+  matches: (req) => {
     assertEquals(req.method, "POST");
     assertEquals(
       req.url,
@@ -62,7 +62,7 @@ stubFetch.stub({
 });
 
 stubFetch.stub({
-  assertion: (req) => {
+  matches: (req) => {
     assertEquals(req.method, "POST");
     assertEquals(
       req.url,
@@ -75,7 +75,7 @@ stubFetch.stub({
 });
 
 stubFetch.stub({
-  assertion: async (req) => {
+  matches: async (req) => {
     assertEquals(req.method, "POST");
     assert(req.url.endsWith("/v2/translate"));
     const body = await req.formData();
@@ -85,7 +85,7 @@ stubFetch.stub({
 });
 
 stubFetch.stub({
-  assertion: async (req) => {
+  matches: async (req) => {
     assertEquals(req.method, "POST");
     assert(req.url.endsWith("/v2/translate"));
     const body = await req.formData();

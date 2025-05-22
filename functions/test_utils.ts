@@ -1,13 +1,29 @@
 import { type Stub, stub } from "@std/testing/mock";
 
+/**
+ * Interface defining a request handler for stubbing fetch requests.
+ *
+ * @property matches - A function that validates if the request matches expected criteria.
+ *                    Should throw an assertion error if the request doesn't match.
+ * @property response - The Response object to return when the request matches.
+ */
 interface StubRequestHandler {
-  assertion: (req: Request) => void | Promise<void>;
+  matches: (req: Request) => void | Promise<void>;
   response: Response;
 }
 
+/**
+ * Error thrown when no stub matches an incoming fetch request.
+ * Provides details about the unmatched request to help with debugging.
+ */
 export class UnmatchedRequestError extends Error {
   request: Request;
 
+  /**
+   * Creates a new UnmatchedRequestError with details about the unmatched request.
+   *
+   * @param request - The Request object that wasn't matched by any stub
+   */
   constructor(request: Request) {
     const method = request.method;
     const url = request.url;
@@ -23,23 +39,56 @@ export class StubFetch {
   private stubs: Map<string, StubRequestHandler> = new Map();
   private stubFetchInstance: Stub | null = null;
 
+  /**
+   * Creates a new StubFetch instance and automatically installs it.
+   * The global fetch function is replaced with the stub immediately upon creation.
+   */
   constructor() {
     this.install();
   }
 
+  /**
+   * Registers a new stub for handling fetch requests.
+   *
+   * @param stubRequestHandler - An object defining the matcher function and response
+   * @returns The same StubRequestHandler for method chaining
+   *
+   * @example
+   * ```typescript
+   * stubFetch.stub({
+   *   matches: (req) => {
+   *     assertEquals(req.url, "https://api.example.com/data");
+   *     assertEquals(req.method, "POST");
+   *   },
+   *   response: new Response(JSON.stringify({ result: "success" }))
+   * });
+   * ```
+   */
   stub(stubRequestHandler: StubRequestHandler): StubRequestHandler {
-    this.stubs.set(stubRequestHandler.assertion.toString(), stubRequestHandler);
+    this.stubs.set(stubRequestHandler.matches.toString(), stubRequestHandler);
     return stubRequestHandler;
   }
 
+  /**
+   * Removes a previously registered stub.
+   *
+   * @param stubRequestHandler - The stub handler to remove
+   * @returns True if the stub is no longer registered
+   */
   removeStub(stubRequestHandler: StubRequestHandler): boolean {
-    const assertionKey = stubRequestHandler.assertion.toString();
-    if (assertionKey in this.stubs) {
-      return this.stubs.delete(assertionKey);
+    const matchesKey = stubRequestHandler.matches.toString();
+    if (matchesKey in this.stubs) {
+      return this.stubs.delete(matchesKey);
     }
     return true;
   }
 
+  /**
+   * Installs the stub in place of the global fetch function.
+   * This method replaces the real fetch implementation with our stubbed version.
+   *
+   * @returns The created stub instance
+   */
   install(): Stub {
     this.stubFetchInstance = stub(
       globalThis,
@@ -51,8 +100,7 @@ export class StubFetch {
 
         for (const stubRequestHandler of this.stubs.values()) {
           try {
-            // Clone the request for each assertion attempt to ensures the body can be read multiple times
-            const assertionResult = stubRequestHandler.assertion(
+            const assertionResult = stubRequestHandler.matches(
               request.clone(),
             );
 
@@ -62,7 +110,7 @@ export class StubFetch {
 
             return Promise.resolve(stubRequestHandler.response.clone());
           } catch (_error) {
-            // do nothing
+            // This stub didn't match, continue to try the next one
           }
         }
 
@@ -73,6 +121,9 @@ export class StubFetch {
     return this.stubFetchInstance;
   }
 
+  /**
+   * Restores the original fetch function.
+   */
   restore(): void {
     if (this.stubFetchInstance) {
       this.stubFetchInstance.restore();
