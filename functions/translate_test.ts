@@ -1,7 +1,7 @@
 import { SlackFunctionTester } from "deno-slack-sdk/mod.ts";
 import { assert, assertEquals, assertNotEquals } from "@std/assert";
 import handler from "./translate.ts";
-import { StubFetch } from "../test_utils.ts";
+import { StubFetch } from "../testing/http.ts";
 
 // Replaces globalThis.fetch with the stub copy
 const stubFetch = new StubFetch();
