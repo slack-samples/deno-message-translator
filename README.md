@@ -198,11 +198,9 @@ $ slack activity --tail
 Contains `apps.dev.json` and `apps.json`, which include installation details for
 development and deployed apps.
 
-### `datastores/`
-
-[Datastores](https://api.slack.com/automation/datastores) securely store data
-for your application on Slack infrastructure. Required scopes to use datastores
-include `datastore:write` and `datastore:read`.
+Contains `hooks.json` used by the CLI to interact with the project's SDK
+dependencies. It contains script hooks that are executed by the CLI and
+implemented by the SDK.
 
 ### `functions/`
 
@@ -229,11 +227,6 @@ continuing to the next step.
 
 The [app manifest](https://api.slack.com/automation/manifest) contains the app's
 configuration. This file defines attributes like app name and description.
-
-### `slack.json`
-
-Used by the CLI to interact with the project's SDK dependencies. It contains
-script hooks that are executed by the CLI and implemented by the SDK.
 
 ## Resources
 

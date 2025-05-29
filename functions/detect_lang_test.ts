@@ -1,5 +1,5 @@
 import { SlackFunctionTester } from "deno-slack-sdk/mod.ts";
-import { assertEquals } from "std/testing/asserts.ts";
+import { assertEquals } from "@std/assert";
 import handler from "./detect_lang.ts";
 
 const { createContext } = SlackFunctionTester("my-function");

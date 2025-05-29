@@ -1,5 +1,5 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
-import { SlackAPIClient } from "deno-slack-sdk/types.ts";
+import type { SlackAPIClient } from "deno-slack-sdk/types.ts";
 import { isDebugMode } from "./internals/debug_mode.ts";
 
 export const def = DefineFunction({
@@ -52,7 +52,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     return { error };
   }
 
-  if (translationTargetResponse.messages.length == 0) {
+  if (translationTargetResponse.messages.length === 0) {
     console.log("No message found");
     return emptyOutputs; // this is not an error
   }
@@ -81,7 +81,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
       if (match.match(/^[#@].*$/)) {
         const matched = match.match(/^([#@].*)$/);
         if (matched != null) {
-          return "<mrkdwn>" + matched[1] + "</mrkdwn>";
+          return `<mrkdwn>${matched[1]}</mrkdwn>`;
         }
         return "";
       }
@@ -93,7 +93,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
       if (match.match(/^!date.*$/)) {
         const matched = match.match(/^(!date.*)$/);
         if (matched != null) {
-          return "<mrkdwn>" + matched[1] + "</mrkdwn>";
+          return `<mrkdwn>${matched[1]}</mrkdwn>`;
         }
         return "";
       }
@@ -101,7 +101,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
       if (match.match(/^!.*$/)) {
         const matched = match.match(/^!(.*?)(?:\|.*)?$/);
         if (matched != null) {
-          return "<ignore>@" + matched[1] + "</ignore>";
+          return `<ignore>@${matched[1]}</ignore>`;
         }
         return "<ignore>@[special mention]</ignore>";
       }
@@ -109,16 +109,16 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
       if (match.match(/^.*?\|.*$/)) {
         const matched = match.match(/^(.*?)\|(.*)$/);
         if (matched != null) {
-          return '<a href="' + matched[1] + '">' + matched[2] + "</a>";
+          return `<a href="${matched[1]}">${matched[2]}</a>`;
         }
         return "";
       }
       // fallback (raw link or unforeseen formatting)
-      return "<mrkdwn>" + match + "</mrkdwn>";
+      return `<mrkdwn>${match}</mrkdwn>`;
       // match emoji
     })
     .replace(/:([a-z0-9_-]+):/g, (_: unknown, match: string) => {
-      return "<emoji>" + match + "</emoji>";
+      return `<emoji>${match}</emoji>`;
     });
   body.append("text", targetText);
   body.append("tag_handling", "xml");
@@ -133,8 +133,8 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     },
     body,
   });
-  if (deeplResponse.status != 200) {
-    if (deeplResponse.status == 403) {
+  if (deeplResponse.status !== 200) {
+    if (deeplResponse.status === 403) {
       // If the status code is 403, the given auth key is not valid
       const error =
         `Translating a message failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: ${deeplResponse.status}, target text: ${
@@ -170,11 +170,11 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
   const translatedText = translationResult.translations[0].text
     // Parse encoding tags to restore the original special syntax
     .replace(/<emoji>([a-z0-9_-]+)<\/emoji>/g, (_: unknown, match: string) => {
-      return ":" + match + ":";
+      return `:${match}:`;
       // match <mrkdwn>...</mrkdwn>
     })
     .replace(/<mrkdwn>(.*?)<\/mrkdwn>/g, (_: unknown, match: string) => {
-      return "<" + match + ">";
+      return `<${match}>`;
       // match <a href="...">...</a>
     })
     .replace(
@@ -182,7 +182,7 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
       (_: unknown, match: string) => {
         const matched = match.match(/<a href="(.*?)">(.*?)<\/a>/);
         if (matched != null) {
-          return "<" + matched[1] + "|" + matched[2] + ">";
+          return `<${matched[1]}|${matched[2]}>`;
         }
         return "";
         // match <ignore>...</ignore>
