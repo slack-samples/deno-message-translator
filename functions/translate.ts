@@ -59,17 +59,17 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
   const translationTarget = translationTargetResponse.messages[0];
   const translationTargetThreadTs = translationTarget.thread_ts;
 
-  const authKey = env.DEEPL_AUTH_KEY;
+  const authKey = normalizeAuthKey(env.DEEPL_AUTH_KEY);
   if (!authKey) {
     const error =
       "DEEPL_AUTH_KEY needs to be set. You can place .env file for local dev. For production apps, please run `slack env add DEEPL_AUTH_KEY (your key here)` to set the value.";
     return { error };
   }
-  const apiSubdomain = authKey.endsWith(":fx") ? "api-free" : "api";
+  const apiSubdomain = authKey.toLowerCase().endsWith(":fx")
+    ? "api-free"
+    : "api";
   const url = `https://${apiSubdomain}.deepl.com/v2/translate`;
   const body = new URLSearchParams();
-
-  body.append("auth_key", authKey);
 
   const targetText = translationTarget.text
     // Before sending the text to the DeepL API,
@@ -130,14 +130,16 @@ export default SlackFunction(def, async ({ inputs, client, env }) => {
     method: "POST",
     headers: {
       "content-type": "application/x-www-form-urlencoded;charset=utf-8",
+      "Authorization": `DeepL-Auth-Key ${authKey}`,
     },
     body,
   });
   if (deeplResponse.status !== 200) {
     if (deeplResponse.status === 403) {
-      // If the status code is 403, the given auth key is not valid
+      // DeepL returns 403 for several auth-related causes (key, endpoint, auth method).
+      const body = await deeplResponse.text();
       const error =
-        `Translating a message failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: ${deeplResponse.status}, target text: ${
+        `Translating a message failed! Please check DEEPL_AUTH_KEY and DeepL API auth settings. - (status: ${deeplResponse.status}, body: ${body}, target text: ${
           targetText.substring(0, 30)
         }...)`;
       console.log(error);
@@ -247,4 +249,17 @@ async function sayInThread(
     text,
     thread_ts: threadTs,
   });
+}
+
+function normalizeAuthKey(rawAuthKey: string | undefined): string | undefined {
+  if (!rawAuthKey) {
+    return undefined;
+  }
+  const trimmed = rawAuthKey.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+  // A quoted value can be accidentally set by env tooling or copy/paste.
+  const unquoted = trimmed.replace(/^(['"])(.*)\1$/, "$2").trim();
+  return unquoted.length === 0 ? undefined : unquoted;
 }
