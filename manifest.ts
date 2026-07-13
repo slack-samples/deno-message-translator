@@ -1,4 +1,4 @@
-import { Manifest } from "deno-slack-sdk/mod.ts";
+import { Manifest } from "@slack/sdk";
 import { def as detectLang } from "./functions/detect_lang.ts";
 import { def as translate } from "./functions/translate.ts";
 import reacjilator from "./workflows/reacjilator.ts";
