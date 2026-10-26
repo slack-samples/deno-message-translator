@@ -60,9 +60,13 @@ function stubFetch() {
             status: 200,
           });
         }
-        case "https://api.deepl.com/v2/translate": {
-          const body = await req.formData();
-          if (body.get("auth_key") === "valid") {
+        case "https://api.deepl.com/v2/translate":
+        case "https://api-free.deepl.com/v2/translate": {
+          const authorization = req.headers.get("Authorization");
+          if (
+            authorization === "DeepL-Auth-Key valid" ||
+            authorization === "DeepL-Auth-Key valid:fx"
+          ) {
             return new Response(
               JSON.stringify({
                 translations: [
@@ -78,7 +82,10 @@ function stubFetch() {
               },
             );
           }
-          return new Response("", { status: 403 });
+          return new Response(
+            JSON.stringify({ message: "Authorization failed" }),
+            { status: 403 },
+          );
         }
         default:
           throw Error(
@@ -134,6 +141,38 @@ Deno.test("Fail to translate with an invalid auth key", async () => {
   assertEquals(outputs, undefined);
   assertEquals(
     error,
-    "Translating a message failed! Please make sure if the DEEPL_AUTH_KEY is correct. - (status: 403, target text: Make work life simpler, more p...)",
+    'Translating a message failed! Please check DEEPL_AUTH_KEY and DeepL API auth settings. - (status: 403, body: {"message":"Authorization failed"}, target text: Make work life simpler, more p...)',
+  );
+});
+
+Deno.test("Translate with quoted DeepL free auth key", async () => {
+  using _stubFetch = stubFetch();
+  const inputs = {
+    channelId: "C123",
+    messageTs: "1670566778.964519",
+    lang: "ja",
+  };
+  const env = { DEEPL_AUTH_KEY: ' "valid:fx"  ', DEBUG_MODE: "false" };
+  const token = "valid";
+  const { outputs } = await handler(createContext({ inputs, env, token }));
+  assertEquals(outputs, { ts: "1111.2222" });
+});
+
+Deno.test("Fail when auth key is blank after trim", async () => {
+  using _stubFetch = stubFetch();
+  const inputs = {
+    channelId: "C123",
+    messageTs: "1670566778.964519",
+    lang: "ja",
+  };
+  const env = { DEEPL_AUTH_KEY: "   ", DEBUG_MODE: "false" };
+  const token = "valid";
+  const { outputs, error } = await handler(
+    createContext({ inputs, env, token }),
+  );
+  assertEquals(outputs, undefined);
+  assertEquals(
+    error,
+    "DEEPL_AUTH_KEY needs to be set. You can place .env file for local dev. For production apps, please run `slack env add DEEPL_AUTH_KEY (your key here)` to set the value.",
   );
 });
