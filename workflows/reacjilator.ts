@@ -1,4 +1,4 @@
-import { DefineWorkflow, Schema } from "deno-slack-sdk/mod.ts";
+import { DefineWorkflow, Schema } from "@slack/sdk";
 import { def as detectLang } from "../functions/detect_lang.ts";
 import { def as translate } from "../functions/translate.ts";
 

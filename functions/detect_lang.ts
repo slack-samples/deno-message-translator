@@ -1,4 +1,4 @@
-import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
+import { DefineFunction, Schema, SlackFunction } from "@slack/sdk";
 import { isDebugMode } from "./internals/debug_mode.ts";
 
 export const def = DefineFunction({
